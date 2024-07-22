@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            input, button {
+                padding: 8px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <input type="text" id="url" placeholder="Enter URL">
+        <button onclick="shortenUrl()">Shorten URL</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const AIRTABLE_API_KEY = 'pat7i2avET8IDLkEO.75be654cc193f2b22e74cab932990b89060e8d1c5b7731167c8597a8a94d989a';
+        const AIRTABLE_BASE_ID = 'appQAoXzpWGY6onos';
+        const AIRTABLE_TABLE_NAME = 'URLs';
+
+        async function shortenUrl() {
+            const url = document.getElementById('url').value;
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            const shortId = generateShortId();
+            const apiUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    fields: {
+                        short_id: shortId,
+                        target_url: url
+                    }
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('result').innerHTML = `Shortened URL: <a href="${url}" target="_blank">${shortId}</a>`;
+            } else {
+                document.getElementById('result').innerText = 'Error shortening URL';
+            }
+        }
+
+        function generateShortId() {
+            return Math.random().toString(36).substr(2, 6);
+        }
+    </script>
+</body>
+</html>
