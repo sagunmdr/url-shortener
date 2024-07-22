@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URL Shortener</title>
+    <title>URL Manager</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,9 +52,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>URL Shortener</h1>
-        <input type="text" id="url" placeholder="Enter URL">
-        <button onclick="shortenUrl()">Shorten URL</button>
+        <h1>URL Manager</h1>
+        <input type="text" id="shortId" placeholder="Enter Short ID (URL A)">
+        <input type="text" id="targetUrl" placeholder="Enter Target URL (URL B, C, D)">
+        <button onclick="addUrl()">Add URL</button>
         <div class="result" id="result"></div>
     </div>
 
@@ -63,14 +64,15 @@
         const AIRTABLE_BASE_ID = 'appQAoXzpWGY6onos';
         const AIRTABLE_TABLE_NAME = 'URLs';
 
-        async function shortenUrl() {
-            const url = document.getElementById('url').value;
-            if (!url) {
-                alert('Please enter a URL');
+        async function addUrl() {
+            const shortId = document.getElementById('shortId').value;
+            const targetUrl = document.getElementById('targetUrl').value;
+
+            if (!shortId || !targetUrl) {
+                alert('Please enter both Short ID and Target URL');
                 return;
             }
 
-            const shortId = generateShortId();
             const apiUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
 
             const response = await fetch(apiUrl, {
@@ -82,7 +84,7 @@
                 body: JSON.stringify({
                     fields: {
                         short_id: shortId,
-                        target_url: url
+                        target_url: targetUrl
                     }
                 })
             });
@@ -90,14 +92,10 @@
             const data = await response.json();
 
             if (response.ok) {
-                document.getElementById('result').innerHTML = `Shortened URL: <a href="${url}" target="_blank">${shortId}</a>`;
+                document.getElementById('result').innerHTML = `URL added successfully: <br> Short ID: <strong>${shortId}</strong><br> Target URL: <a href="${targetUrl}" target="_blank">${targetUrl}</a>`;
             } else {
-                document.getElementById('result').innerText = 'Error shortening URL';
+                document.getElementById('result').innerText = 'Error adding URL';
             }
-        }
-
-        function generateShortId() {
-            return Math.random().toString(36).substr(2, 6);
         }
     </script>
 </body>
